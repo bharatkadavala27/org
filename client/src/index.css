@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-color: #b91c1c;
+  --brand-color-dark: #7f1d1d;
+  --brand-rgb: 185 28 28;
+  --brand-dark-rgb: 127 29 29;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply font-guj bg-gray-50 text-gray-900 antialiased;
+}
+
+/* Large tap targets for mobile-first donor/subadmin screens */
+.btn {
+  @apply inline-flex items-center justify-center rounded-lg px-4 py-3 text-base font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+.btn-primary {
+  @apply btn bg-brand text-white hover:bg-brand-dark focus:ring-brand;
+}
+.btn-secondary {
+  @apply btn bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 focus:ring-gray-400;
+}
+.btn-danger {
+  @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+}
+.input {
+  @apply w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:border-brand focus:ring-1 focus:ring-brand;
+}
+.label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 p-4;
+}
+.chip {
+  @apply px-4 py-2 rounded-full border text-base font-semibold cursor-pointer transition;
+}
