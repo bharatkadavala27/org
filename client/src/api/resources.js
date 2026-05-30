@@ -1,7 +1,9 @@
 import { api } from './client';
 
 // ---- Schemes ----
-export const getSchemes = () => api.get('/api/schemes').then((r) => r.data);
+export const getSchemes = (params = {}) => api.get('/api/schemes', { params }).then((r) => r.data);
+export const createScheme = (body) => api.post('/api/schemes', body).then((r) => r.data);
+export const updateScheme = (id, body) => api.put(`/api/schemes/${id}`, body).then((r) => r.data);
 
 // ---- Settings (UPI & Branding) ----
 export const getUpiSettings = () => api.get('/api/settings/upi').then((r) => r.data);

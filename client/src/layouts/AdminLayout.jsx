@@ -4,6 +4,7 @@ import Brand from '../components/Brand';
 
 const links = [
   { to: '/admin', label: 'ડેશબોર્ડ (Dashboard)', end: true },
+  { to: '/admin/schemes', label: 'સ્કીમ (Schemes)' },
   { to: '/admin/slips', label: 'સ્લિપ સમીક્ષા (Slips)' },
   { to: '/admin/handovers', label: 'હેન્ડઓવર (Handovers)' },
   { to: '/admin/expenses', label: 'Expenses' },

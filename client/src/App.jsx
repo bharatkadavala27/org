@@ -16,6 +16,7 @@ import SubAdminLayout from './layouts/SubAdminLayout';
 // Admin pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UsersPage from './pages/admin/UsersPage';
+import SchemesPage from './pages/admin/SchemesPage';
 import SlipsReviewPage from './pages/admin/SlipsReviewPage';
 import HandoversReviewPage from './pages/admin/HandoversReviewPage';
 import ImportPage from './pages/admin/ImportPage';
@@ -89,6 +90,7 @@ export default function App() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<UsersPage />} />
+        <Route path="schemes" element={<SchemesPage />} />
         <Route path="slips" element={<SlipsReviewPage />} />
         <Route path="handovers" element={<HandoversReviewPage />} />
         <Route path="import" element={<ImportPage />} />
