@@ -40,7 +40,7 @@ export function createApp() {
         directives: {
           defaultSrc: ["'self'"],
           imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
-          scriptSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
           styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
           fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
           connectSrc: ["'self'", 'https://api.cloudinary.com'],

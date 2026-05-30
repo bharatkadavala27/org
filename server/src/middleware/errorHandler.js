@@ -6,18 +6,23 @@ export function notFound(req, res, _next) {
 
 // eslint-disable-next-line no-unused-vars
 export function errorHandler(err, req, res, _next) {
-  const status = err.status || err.statusCode || 500;
+  let status = err.status || err.statusCode || 500;
   const isProd = process.env.NODE_ENV === 'production';
 
   // Mongoose validation / duplicate-key friendly messages.
   let message = err.message || 'Something went wrong';
   if (err.name === 'ValidationError') {
+    status = 400;
     message = Object.values(err.errors)
       .map((e) => e.message)
       .join('; ');
   } else if (err.code === 11000) {
+    status = 400;
     const field = Object.keys(err.keyValue || {})[0] || 'field';
     message = `Duplicate value for ${field}`;
+  } else if (err.name === 'CastError') {
+    status = 400;
+    message = `Invalid ${err.path}: ${err.value}`;
   }
 
   if (!isProd && status >= 500) {
