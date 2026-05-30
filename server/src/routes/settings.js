@@ -8,7 +8,6 @@ import { audit } from '../middleware/audit.js';
 const router = Router();
 
 const UPI_KEY = 'upi';
-const THEME_KEY = 'theme';
 const BRANDING_KEY = 'branding';
 
 const DEFAULT_BRANDING = {
@@ -52,7 +51,7 @@ router.get(
       payeeVpa: value.payeeVpa || '',
       payeeName: value.payeeName || '',
       defaultNote: value.defaultNote || '',
-      qrImageUrl: value.qrImageUrl || '', // optional admin-uploaded QR image
+      qrImageUrl: value.qrImageUrl || '',
     });
   })
 );
@@ -70,7 +69,6 @@ router.put(
     if ((!cleanVpa || !cleanName) && !cleanQrUrl) {
       throw new HttpError(400, 'Enter UPI ID and payee name, or upload a QR image.');
     }
-    // Light VPA sanity check (name@bank).
     if (cleanVpa && !/^[\w.\-]{2,}@[a-zA-Z]{2,}$/.test(cleanVpa)) {
       throw new HttpError(400, 'UPI ID looks invalid (expected like name@bank).');
     }

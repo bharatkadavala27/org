@@ -29,7 +29,6 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Sidebar (desktop) / top (mobile) */}
       <aside className="md:w-64 bg-white border-b md:border-b-0 md:border-r border-gray-200 md:min-h-screen">
         <div className="p-4 border-b">
           <Brand compact />
@@ -52,7 +51,6 @@ export default function AdminLayout() {
         </nav>
       </aside>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col">
         <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
           <span className="text-sm text-gray-600">

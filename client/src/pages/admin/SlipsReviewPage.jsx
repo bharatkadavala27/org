@@ -14,22 +14,10 @@ const FILTERS = [
   { key: 'void', label: 'Void', params: { status: 'void' } },
 ];
 
-function slipKey(slip) {
-  return slip.slipId || slip.id || slip._id;
-}
-
-function donorName(slip) {
-  return slip.isAnonymous ? t.anonymous : slip.donor?.name || slip.donorName || '-';
-}
-
-function donorVillage(slip) {
-  return slip.donor?.village || slip.village || '';
-}
-
-function schemeName(slip) {
-  return slip.scheme?.name || slip.schemeName || '';
-}
-
+function slipKey(slip) { return slip.slipId || slip.id || slip._id; }
+function donorName(slip) { return slip.isAnonymous ? t.anonymous : slip.donor?.name || slip.donorName || '-'; }
+function donorVillage(slip) { return slip.donor?.village || slip.village || ''; }
+function schemeName(slip) { return slip.scheme?.name || slip.schemeName || ''; }
 function receiptProps(slip) {
   return {
     slipId: slip.slipId || slipKey(slip),
@@ -43,7 +31,6 @@ function receiptProps(slip) {
     date: slip.issuedAt || slip.createdAt,
   };
 }
-
 function simpleWhatsappUrl(slip) {
   const mobile = String(slip.donor?.mobile || slip.mobile || '').replace(/\D/g, '');
   const phone = mobile.length === 10 ? `91${mobile}` : mobile.length >= 11 && mobile.length <= 15 ? mobile : '';
@@ -73,26 +60,15 @@ export default function SlipsReviewPage() {
 
   const confirmMut = useMutation({
     mutationFn: (id) => confirmSlip(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['slips'] });
-      setConfirmTarget(null);
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['slips'] }); setConfirmTarget(null); },
   });
-
   const voidMut = useMutation({
     mutationFn: ({ id, reason }) => voidSlip(id, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['slips'] });
-      setVoidTarget(null);
-      setVoidReason('');
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['slips'] }); setVoidTarget(null); setVoidReason(''); },
   });
 
   const handleVoidSubmit = () => {
-    if (!voidReason.trim()) {
-      setVoidReasonErr('Reason is required.');
-      return;
-    }
+    if (!voidReason.trim()) { setVoidReasonErr('Reason is required.'); return; }
     setVoidReasonErr('');
     voidMut.mutate({ id: slipKey(voidTarget), reason: voidReason.trim() });
   };
@@ -202,11 +178,7 @@ export default function SlipsReviewPage() {
                     <button
                       className="btn-danger px-3 py-2 text-sm"
                       type="button"
-                      onClick={() => {
-                        setVoidTarget(slip);
-                        setVoidReason('');
-                        setVoidReasonErr('');
-                      }}
+                      onClick={() => { setVoidTarget(slip); setVoidReason(''); setVoidReasonErr(''); }}
                     >
                       Void
                     </button>
@@ -259,23 +231,14 @@ export default function SlipsReviewPage() {
           voidTarget && (
             <div>
               <label className="label" htmlFor="voidReason">Reason *</label>
-              <input
-                id="voidReason"
-                className="input"
-                value={voidReason}
-                onChange={(event) => setVoidReason(event.target.value)}
-                placeholder="Write the reason"
-              />
+              <input id="voidReason" className="input" value={voidReason} onChange={(e) => setVoidReason(e.target.value)} placeholder="Write the reason" />
               <FieldError>{voidReasonErr}</FieldError>
             </div>
           )
         }
         confirmLabel="Void slip"
         onConfirm={handleVoidSubmit}
-        onCancel={() => {
-          setVoidTarget(null);
-          setVoidReason('');
-        }}
+        onCancel={() => { setVoidTarget(null); setVoidReason(''); }}
         busy={voidMut.isPending}
       />
     </div>

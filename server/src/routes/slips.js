@@ -12,33 +12,19 @@ import { isValidAmount, round2 } from '../lib/money.js';
 const router = Router();
 router.use(requireAuth);
 
-// Helper: subadmin may only act on slips they collected.
 function canTouchSlip(req, slip) {
   if (req.user.role === 'admin') return true;
   return slip.collectedBy && String(slip.collectedBy) === req.user.id;
 }
 
-// ---------------------------------------------------------------------------
-// POST /api/slips  — sub-admin (or admin) issues a slip
-// { donorName?, fatherOrHusbandName?, village, mobile?, existingDonorId?, isAnonymous,
-//   schemeId, amount, paymentMode, bookNumber?, paymentRef? }
-// ---------------------------------------------------------------------------
+// POST /api/slips — sub-admin (or admin) issues a slip
 router.post(
   '/',
   attachAssignedVillages,
   asyncHandler(async (req, res) => {
     const {
-      donorName,
-      fatherOrHusbandName,
-      village,
-      mobile,
-      existingDonorId,
-      isAnonymous,
-      schemeId,
-      amount,
-      paymentMode,
-      bookNumber,
-      paymentRef,
+      donorName, fatherOrHusbandName, village, mobile, existingDonorId,
+      isAnonymous, schemeId, amount, paymentMode, bookNumber, paymentRef,
     } = req.body || {};
 
     if (!schemeId) throw new HttpError(400, 'Please select a scheme.');
@@ -67,7 +53,6 @@ router.post(
       }
     }
 
-    // Geography scope for sub-admins: the slip's village must be assigned.
     if (req.user.role === 'subadmin') {
       if (!donorVillage) throw new HttpError(400, 'Village is required.');
       if (!req.allowedVillages.includes(donorVillage)) {
@@ -75,7 +60,6 @@ router.post(
       }
     }
 
-    // Create donor if needed.
     if (!anon && !donorId) {
       const donor = await Donor.create({
         name: String(donorName).trim(),
@@ -99,7 +83,6 @@ router.post(
       amount: round2(amount),
       paymentMode,
       paymentRef: paymentRef ? String(paymentRef).trim() : undefined,
-      // cash is inherently confirmed at point of collection; upi/cheque need confirmation
       paymentConfirmed: paymentMode === 'cash',
       collectedBy: req.user.id,
       status: 'active',
@@ -119,9 +102,7 @@ router.post(
   })
 );
 
-// ---------------------------------------------------------------------------
-// GET /api/slips  — list. subadmin: only own; admin: all. Filters: status, paymentConfirmed, schemeId, year, unhandedOnly
-// ---------------------------------------------------------------------------
+// GET /api/slips — list
 router.get(
   '/',
   attachAssignedVillages,
@@ -134,7 +115,6 @@ router.get(
     if (req.query.year) filter.year = Number(req.query.year);
     if (req.query.paymentConfirmed === 'true') filter.paymentConfirmed = true;
     if (req.query.paymentConfirmed === 'false') filter.paymentConfirmed = false;
-    // For handover building: active slips not yet locked in a confirmed handover.
     if (req.query.handoverEligible === 'true') {
       filter.status = 'active';
       filter.inConfirmedHandover = false;
@@ -151,10 +131,7 @@ router.get(
   })
 );
 
-// ---------------------------------------------------------------------------
-// GET /api/slips/:slipId — single (for receipt). Public-ish but requires auth here;
-// public receipt is rendered client-side from the donate response.
-// ---------------------------------------------------------------------------
+// GET /api/slips/:slipId — single (for receipt)
 router.get(
   '/:slipId',
   asyncHandler(async (req, res) => {
@@ -170,9 +147,7 @@ router.get(
   })
 );
 
-// ---------------------------------------------------------------------------
 // PATCH /api/slips/:slipId/confirm — admin confirms a UPI/cheque payment
-// ---------------------------------------------------------------------------
 router.patch(
   '/:slipId/confirm',
   requireRole('admin'),
@@ -194,9 +169,7 @@ router.patch(
   })
 );
 
-// ---------------------------------------------------------------------------
 // PATCH /api/slips/:slipId/void — void with a reason (no hard delete)
-// ---------------------------------------------------------------------------
 router.patch(
   '/:slipId/void',
   asyncHandler(async (req, res) => {
@@ -226,7 +199,6 @@ router.patch(
     res.json({
       slipId: slip.slipId,
       status: slip.status,
-      // flag so the UI can warn the office to reconcile a confirmed handover
       flaggedInConfirmedHandover: alreadyInConfirmed,
     });
   })

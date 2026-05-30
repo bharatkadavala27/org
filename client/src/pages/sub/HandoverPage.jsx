@@ -14,26 +14,19 @@ export default function HandoverPage() {
   const [errors, setErrors] = useState({});
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // Eligible slips
   const slipsQ = useQuery({
     queryKey: ['slips', 'handoverEligible'],
     queryFn: () => getSlips({ handoverEligible: true }),
   });
-
-  // Past handovers
   const handoversQ = useQuery({
     queryKey: ['handovers', 'mine'],
     queryFn: () => getHandovers(),
   });
 
   const eligibleSlips = slipsQ.data || [];
-
   const selectedIds = Object.keys(selected).filter((k) => selected[k]);
   const selectedSlips = eligibleSlips.filter((s) => selectedIds.includes(String(s.id || s._id)));
-
-  // Safe integer-paise sum
   const expectedTotal = useMemo(() => sumPaise(selectedSlips.map((s) => s.amount)), [selectedSlips]);
-
   const receivedNum = Number(receivedTotal) || 0;
   const variancePaise = toPaise(receivedNum) - toPaise(expectedTotal);
   const variance = variancePaise / 100;
@@ -42,7 +35,6 @@ export default function HandoverPage() {
     const key = slip.id || slip._id;
     setSelected((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-
   const selectAll = () => {
     const all = {};
     eligibleSlips.forEach((s) => { all[s.id || s._id] = true; });
@@ -70,17 +62,9 @@ export default function HandoverPage() {
     },
   });
 
-  const handleSubmit = () => {
-    if (!validate()) return;
-    setConfirmOpen(true);
-  };
-
+  const handleSubmit = () => { if (validate()) setConfirmOpen(true); };
   const doSubmit = () => {
-    handoverMut.mutate({
-      slipIds: selectedIds,
-      receivedTotal: receivedNum,
-      note: note.trim() || undefined,
-    });
+    handoverMut.mutate({ slipIds: selectedIds, receivedTotal: receivedNum, note: note.trim() || undefined });
   };
 
   if (slipsQ.isLoading) return <Loading />;
@@ -92,7 +76,6 @@ export default function HandoverPage() {
     <div>
       <h1 className="text-xl font-bold mb-4">હેન્ડઓવર (Handover)</h1>
 
-      {/* Eligible slips */}
       <div className="card mb-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-bold">રોકડ સ્લિપ પસંદ કરો</h2>
@@ -127,7 +110,6 @@ export default function HandoverPage() {
         <FieldError>{errors.slips}</FieldError>
       </div>
 
-      {/* Totals */}
       {selectedIds.length > 0 && (
         <div className="card mb-4">
           <div className="flex justify-between mb-2">
@@ -136,14 +118,7 @@ export default function HandoverPage() {
           </div>
           <div>
             <label className="label">પ્રાપ્ત રકમ (Received) *</label>
-            <input
-              className="input text-lg font-bold"
-              type="number"
-              inputMode="numeric"
-              value={receivedTotal}
-              onChange={(e) => setReceivedTotal(e.target.value)}
-              placeholder="₹"
-            />
+            <input className="input text-lg font-bold" type="number" inputMode="numeric" value={receivedTotal} onChange={(e) => setReceivedTotal(e.target.value)} placeholder="₹" />
             <FieldError>{errors.receivedTotal}</FieldError>
           </div>
           {receivedTotal && (
@@ -159,16 +134,13 @@ export default function HandoverPage() {
               <FieldError>{errors.note}</FieldError>
             </div>
           )}
-
           {handoverMut.error && <FieldError>{handoverMut.error.message}</FieldError>}
-
           <button className="btn-primary w-full mt-4" onClick={handleSubmit} disabled={handoverMut.isPending}>
             {handoverMut.isPending ? t.loading : `હેન્ડઓવર સબમિટ (${selectedIds.length} સ્લિપ)`}
           </button>
         </div>
       )}
 
-      {/* Past handovers */}
       {handovers.length > 0 && (
         <div className="mt-6">
           <h2 className="font-bold mb-3">ભૂતકાળના હેન્ડઓવર</h2>

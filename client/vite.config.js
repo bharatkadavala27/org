@@ -18,11 +18,11 @@ export default defineConfig({
             src: 'pwa-icon.svg',
             sizes: '192x192 512x512',
             type: 'image/svg+xml',
-            purpose: 'any maskable'
-          }
-        ]
-      }
-    })
+            purpose: 'any maskable',
+          },
+        ],
+      },
+    }),
   ],
   server: { port: 5173, host: true },
   // relative base so the Capacitor APK can load assets from the file system

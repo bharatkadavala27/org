@@ -3,7 +3,7 @@ import { api } from './client';
 // ---- Schemes ----
 export const getSchemes = () => api.get('/api/schemes').then((r) => r.data);
 
-// ---- Settings (UPI & Theme) ----
+// ---- Settings (UPI & Branding) ----
 export const getUpiSettings = () => api.get('/api/settings/upi').then((r) => r.data);
 export const saveUpiSettings = (body) => api.put('/api/settings/upi', body).then((r) => r.data);
 export const getBrandingSettings = () => api.get('/api/settings/branding').then((r) => r.data);

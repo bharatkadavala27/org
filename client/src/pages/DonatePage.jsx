@@ -11,7 +11,7 @@ import QRCode from 'qrcode';
 const QUICK_AMOUNTS = [101, 501, 1100];
 
 export default function DonatePage() {
-  const [step, setStep] = useState('form'); // form | payment | success
+  const [step, setStep] = useState('form');
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
   const [village, setVillage] = useState('');
@@ -22,13 +22,11 @@ export default function DonatePage() {
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
 
-  // Payment step state
   const [slipResult, setSlipResult] = useState(null);
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [receipt, setReceipt] = useState(null);
   const [uploadBusy, setUploadBusy] = useState(false);
 
-  // Typeahead
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -38,16 +36,15 @@ export default function DonatePage() {
   const schemes = schemesQ.data || [];
   const upiSettings = upiQ.data || {};
 
-  // Donor search
   useEffect(() => {
     if (query.length < 2) { setSuggestions([]); return; }
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       try {
         const res = await searchDonors(query);
         setSuggestions(res || []);
       } catch { setSuggestions([]); }
     }, 300);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [query]);
 
   const selectDonor = (d) => {
@@ -98,11 +95,7 @@ export default function DonatePage() {
     e.preventDefault();
     if (!validate()) return;
     setSubmitError('');
-    const body = {
-      isAnonymous,
-      schemeId,
-      amount: Number(amount),
-    };
+    const body = { isAnonymous, schemeId, amount: Number(amount) };
     if (!isAnonymous) {
       body.name = name.trim();
       if (mobile.trim()) body.mobile = mobile.trim();
@@ -125,7 +118,7 @@ export default function DonatePage() {
       setReceipt({
         slipId: slipResult.slipId,
         amount: slipResult.amount,
-        scheme: slipResult.scheme?.name || '',
+        scheme: slipResult.scheme?.name || slipResult.scheme || '',
         donorName: isAnonymous ? t.anonymous : name,
         village,
         paymentMode: 'upi',
@@ -143,7 +136,6 @@ export default function DonatePage() {
   if (schemesQ.isLoading || upiQ.isLoading) return <Loading />;
   if (schemesQ.error) return <ErrorState error={schemesQ.error} onRetry={schemesQ.refetch} />;
 
-  // === SUCCESS SCREEN ===
   if (step === 'success' && receipt) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center justify-center">
@@ -157,7 +149,6 @@ export default function DonatePage() {
     );
   }
 
-  // === PAYMENT SCREEN ===
   if (step === 'payment' && slipResult) {
     const upiLink = buildUpiLink({
       payeeVpa: upiSettings.payeeVpa,
@@ -205,7 +196,6 @@ export default function DonatePage() {
     );
   }
 
-  // === FORM SCREEN ===
   return (
     <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center">
       <div className="card max-w-md w-full">
@@ -213,7 +203,6 @@ export default function DonatePage() {
         <h1 className="text-xl font-bold text-center mb-6">{t.donate}</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Anonymous toggle */}
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={isAnonymous} onChange={(e) => { setIsAnonymous(e.target.checked); if (e.target.checked) { setName(''); setMobile(''); setVillage(''); setExistingDonorId(null); } }} />
             <span className="font-medium">{t.anonymous}</span>
@@ -258,7 +247,6 @@ export default function DonatePage() {
             </>
           )}
 
-          {/* Scheme */}
           <div>
             <label className="label">{t.scheme}</label>
             <select className="input" value={schemeId} onChange={(e) => setSchemeId(e.target.value)}>
@@ -268,7 +256,6 @@ export default function DonatePage() {
             <FieldError>{errors.schemeId}</FieldError>
           </div>
 
-          {/* Amount */}
           <div>
             <label className="label">{t.amount}</label>
             <input

@@ -10,11 +10,9 @@ import { t } from '../../lib/i18n';
 function slipKey(slip) {
   return slip.slipId || slip.id || slip._id;
 }
-
 function donorName(slip) {
   return slip.isAnonymous ? t.anonymous : slip.donor?.name || slip.donorName || '-';
 }
-
 function receiptProps(slip) {
   return {
     slipId: slip.slipId || slipKey(slip),
@@ -28,7 +26,6 @@ function receiptProps(slip) {
     date: slip.issuedAt || slip.createdAt,
   };
 }
-
 function whatsappUrl(slip) {
   const mobile = String(slip.donor?.mobile || slip.mobile || '').replace(/\D/g, '');
   const phone = mobile.length === 10 ? `91${mobile}` : mobile.length >= 11 && mobile.length <= 15 ? mobile : '';
@@ -130,11 +127,7 @@ export default function MySlipsPage() {
                     <button
                       className="btn-danger px-3 py-2 text-sm"
                       type="button"
-                      onClick={() => {
-                        setVoidTarget(slip);
-                        setReason('');
-                        setReasonErr('');
-                      }}
+                      onClick={() => { setVoidTarget(slip); setReason(''); setReasonErr(''); }}
                     >
                       Void
                     </button>
@@ -167,22 +160,13 @@ export default function MySlipsPage() {
         detail={
           <div>
             <label className="label" htmlFor="subVoidReason">Reason *</label>
-            <input
-              id="subVoidReason"
-              className="input"
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-              placeholder="Write the reason"
-            />
+            <input id="subVoidReason" className="input" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Write the reason" />
             <FieldError>{reasonErr}</FieldError>
           </div>
         }
         confirmLabel="Void slip"
         onConfirm={handleVoid}
-        onCancel={() => {
-          setVoidTarget(null);
-          setReason('');
-        }}
+        onCancel={() => { setVoidTarget(null); setReason(''); }}
         busy={voidMut.isPending}
       />
     </div>

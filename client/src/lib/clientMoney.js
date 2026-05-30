@@ -13,7 +13,6 @@ export function isValidAmount(v) {
   const n = Number(v);
   return Number.isFinite(n) && n > 0;
 }
-
 export function formatRupees(rupees) {
   const v = round2(rupees);
   return '₹' + v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

@@ -98,13 +98,12 @@ export function createApp() {
   app.locals.publicDonationLimiter = publicDonationLimiter;
 
   // --- 404 + errors ---
-  app.use('/api', notFound); // Ensure unhandled API routes return JSON 404
+  app.use('/api', notFound); // unhandled API routes return JSON 404
 
   if (process.env.NODE_ENV === 'production') {
-    // Serve frontend
     const clientDist = path.join(__dirname, '../../client/dist');
     app.use(express.static(clientDist));
-    app.get('*', (req, res) => {
+    app.get('*', (_req, res) => {
       res.sendFile(path.join(clientDist, 'index.html'));
     });
   } else {

@@ -6,15 +6,13 @@ import { asyncHandler, HttpError } from '../middleware/errorHandler.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/rbac.js';
 import { audit } from '../middleware/audit.js';
-import { sumRupees, round2, isValidAmount } from '../lib/money.js';
+import { sumRupees, round2 } from '../lib/money.js';
 
 const router = Router();
 router.use(requireAuth);
 
-// ---------------------------------------------------------------------------
 // POST /api/handovers — sub-admin submits a handover for selected slips
 // { slipIds:[...], receivedTotal, note? }
-// ---------------------------------------------------------------------------
 router.post(
   '/',
   asyncHandler(async (req, res) => {
@@ -27,12 +25,9 @@ router.post(
     }
 
     // Load slips by ObjectId or slipId to prevent CastErrors from stale clients.
-    const validObjectIds = slipIds.filter(id => mongoose.Types.ObjectId.isValid(id));
+    const validObjectIds = slipIds.filter((id) => mongoose.Types.ObjectId.isValid(id));
     const slips = await Slip.find({
-      $or: [
-        { _id: { $in: validObjectIds } },
-        { slipId: { $in: slipIds } },
-      ],
+      $or: [{ _id: { $in: validObjectIds } }, { slipId: { $in: slipIds } }],
     });
     if (slips.length !== slipIds.length) throw new HttpError(400, 'Some slips were not found.');
 
@@ -79,9 +74,7 @@ router.post(
   })
 );
 
-// ---------------------------------------------------------------------------
 // GET /api/handovers — subadmin: own; admin: all (filter ?status=)
-// ---------------------------------------------------------------------------
 router.get(
   '/',
   asyncHandler(async (req, res) => {
@@ -96,22 +89,16 @@ router.get(
   })
 );
 
-// ---------------------------------------------------------------------------
 // GET /api/handovers/:id — detail with slips
-// ---------------------------------------------------------------------------
 router.get(
   '/:id',
   asyncHandler(async (req, res) => {
-    const h = await Handover.findById(req.params.id)
-      .populate('subAdminId', 'name phone')
-      .lean();
+    const h = await Handover.findById(req.params.id).populate('subAdminId', 'name phone').lean();
     if (!h) throw new HttpError(404, 'Handover not found.');
     if (req.user.role === 'subadmin' && String(h.subAdminId._id) !== req.user.id) {
       throw new HttpError(403, 'Not your handover.');
     }
-    const slips = await Slip.find({ _id: { $in: h.slipIds } })
-      .populate('donorId', 'name village')
-      .lean();
+    const slips = await Slip.find({ _id: { $in: h.slipIds } }).populate('donorId', 'name village').lean();
     res.json({
       ...serialize(h),
       slips: slips.map((s) => ({
@@ -125,10 +112,8 @@ router.get(
   })
 );
 
-// ---------------------------------------------------------------------------
 // PATCH /api/handovers/:id/confirm — admin confirms; LOCKS slips.
 // Uses a transaction to prevent two handovers claiming the same slip.
-// ---------------------------------------------------------------------------
 router.patch(
   '/:id/confirm',
   requireRole('admin'),
@@ -141,7 +126,6 @@ router.patch(
         if (!h) throw new HttpError(404, 'Handover not found.');
         if (h.status === 'confirmed') throw new HttpError(400, 'Already confirmed.');
 
-        // Re-check no slip got locked by another handover meanwhile.
         const slips = await Slip.find({ _id: { $in: h.slipIds } }).session(session);
         for (const s of slips) {
           if (s.inConfirmedHandover) {
@@ -152,11 +136,7 @@ router.patch(
           }
         }
 
-        await Slip.updateMany(
-          { _id: { $in: h.slipIds } },
-          { $set: { inConfirmedHandover: true } },
-          { session }
-        );
+        await Slip.updateMany({ _id: { $in: h.slipIds } }, { $set: { inConfirmedHandover: true } }, { session });
         h.status = 'confirmed';
         h.confirmedBy = req.user.id;
         await h.save({ session });
@@ -177,9 +157,7 @@ router.patch(
   })
 );
 
-// ---------------------------------------------------------------------------
 // PATCH /api/handovers/:id/dispute — admin marks disputed (with note)
-// ---------------------------------------------------------------------------
 router.patch(
   '/:id/dispute',
   requireRole('admin'),
@@ -208,9 +186,10 @@ router.patch(
 function serialize(h) {
   return {
     id: String(h._id),
-    subAdmin: h.subAdminId && h.subAdminId.name
-      ? { id: String(h.subAdminId._id), name: h.subAdminId.name, phone: h.subAdminId.phone }
-      : String(h.subAdminId),
+    subAdmin:
+      h.subAdminId && h.subAdminId.name
+        ? { id: String(h.subAdminId._id), name: h.subAdminId.name, phone: h.subAdminId.phone }
+        : String(h.subAdminId),
     slipCount: Array.isArray(h.slipIds) ? h.slipIds.length : 0,
     expectedTotal: h.expectedTotal,
     receivedTotal: h.receivedTotal,

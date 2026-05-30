@@ -1,5 +1,4 @@
-// Minimal Gujarati-first label dictionary. Donor/sub-admin screens use Gujarati;
-// admin screens may show "Gujarati (English)".
+// Gujarati-first label dictionary.
 export const t = {
   appName: 'શ્રી સગર જ્ઞાતિ સમાજ વિભાગ, જૂનાગઢ',
   regNo: 'રજી. નં. એ/૧૬૦૩',
