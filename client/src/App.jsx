@@ -33,6 +33,23 @@ import NewSlipPage from './pages/sub/NewSlipPage';
 import MySlipsPage from './pages/sub/MySlipsPage';
 import HandoverPage from './pages/sub/HandoverPage';
 
+import { useQuery } from '@tanstack/react-query';
+import { getBranding } from './api/resources';
+
+// Helper to convert hex to rgb for Tailwind opacity
+function hexToRgb(hex) {
+  let c;
+  if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+    c = hex.substring(1).split('');
+    if (c.length === 3) {
+      c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+    }
+    c = '0x' + c.join('');
+    return [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(' ');
+  }
+  return '185 28 28'; // default red
+}
+
 function HomeRedirect() {
   const { user, ready } = useAuth();
   if (!ready) return <Loading />;
@@ -40,9 +57,23 @@ function HomeRedirect() {
   return <Navigate to={user.role === 'admin' ? '/admin' : '/sub'} replace />;
 }
 
+function ThemeInjector() {
+  const { data: branding } = useQuery({ queryKey: ['branding'], queryFn: getBranding });
+  
+  if (branding?.primaryColor) {
+    document.documentElement.style.setProperty('--brand-color', branding.primaryColor);
+    document.documentElement.style.setProperty('--brand-rgb', hexToRgb(branding.primaryColor));
+    // Approximate a darker shade for hover states
+    document.documentElement.style.setProperty('--brand-color-dark', branding.primaryColor + 'cc'); 
+  }
+  return null;
+}
+
 export default function App() {
   return (
-    <Routes>
+    <>
+      <ThemeInjector />
+      <Routes>
       {/* Public */}
       <Route path="/" element={<HomeRedirect />} />
       <Route path="/donate" element={<DonatePage />} />
@@ -89,6 +120,7 @@ export default function App() {
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }

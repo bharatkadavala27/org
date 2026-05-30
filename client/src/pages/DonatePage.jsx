@@ -165,7 +165,15 @@ export default function DonatePage() {
           <h2 className="text-xl font-bold mt-4 mb-1">{t.scanToPay}</h2>
           <p className="text-2xl font-bold text-brand mb-4">{inr(slipResult.amount)}</p>
           {displayQrUrl ? (
-            <img src={displayQrUrl} alt="UPI QR" className="mx-auto mb-4 h-64 w-64 rounded-lg border object-contain p-2" />
+            <>
+              <img src={displayQrUrl} alt="UPI QR" className="mx-auto mb-4 h-64 w-64 rounded-lg border border-gray-200 object-contain p-2 shadow-sm" />
+              {upiSettings.upiNumber && (
+                <div className="mb-4 text-center">
+                  <p className="text-sm text-gray-500">Or pay using UPI Number / Mobile:</p>
+                  <p className="text-lg font-bold tracking-wider text-gray-800">{upiSettings.upiNumber}</p>
+                </div>
+              )}
+            </>
           ) : (
             <div className="mb-4 rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
               UPI QR is not configured. Please contact the trust office before paying.

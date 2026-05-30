@@ -28,20 +28,22 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      <aside className="md:w-64 bg-white border-b md:border-b-0 md:border-r border-gray-200 md:min-h-screen">
-        <div className="p-4 border-b">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#f8fafc]">
+      <aside className="md:w-64 bg-white/80 backdrop-blur-xl border-b md:border-b-0 md:border-r border-gray-200/60 md:min-h-screen shadow-sm relative z-10">
+        <div className="p-5 border-b border-gray-100">
           <Brand compact />
         </div>
-        <nav className="p-2 flex md:flex-col gap-1 overflow-x-auto">
+        <nav className="p-3 flex md:flex-col gap-1.5 overflow-x-auto">
           {links.map((l) => (
             <NavLink
               key={l.to}
               to={l.to}
               end={l.end}
               className={({ isActive }) =>
-                `whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium ${
-                  isActive ? 'bg-brand text-white' : 'text-gray-700 hover:bg-gray-100'
+                `whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${
+                  isActive 
+                    ? 'bg-gradient-to-r from-brand to-brand-dark text-white shadow-md shadow-brand/20' 
+                    : 'text-gray-600 hover:bg-gray-100/80 hover:text-gray-900'
                 }`
               }
             >
@@ -51,16 +53,23 @@ export default function AdminLayout() {
         </nav>
       </aside>
 
-      <div className="flex-1 flex flex-col">
-        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-          <span className="text-sm text-gray-600">
-            {user?.name} · <span className="font-medium">Admin</span>
-          </span>
-          <button className="btn-secondary py-2 px-3 text-sm" onClick={onLogout}>
-            લૉગ આઉટ
+      <div className="flex-1 flex flex-col relative z-0">
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/60 px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-brand to-brand-dark text-white flex items-center justify-center font-bold shadow-inner">
+              {user?.name?.charAt(0)?.toUpperCase()}
+            </div>
+            <span className="text-sm text-gray-700">
+              {user?.name} <span className="text-gray-400 mx-1">|</span> <span className="font-semibold text-brand px-2 py-0.5 rounded-md bg-brand/10">Admin</span>
+            </span>
+          </div>
+          <button className="btn-secondary py-2 px-4 text-sm rounded-full shadow hover:shadow-md transition-shadow" onClick={onLogout}>
+            લૉગ આઉટ (Logout)
           </button>
         </header>
-        <main className="flex-1 p-4 max-w-6xl w-full mx-auto">
+        <main className="flex-1 p-6 max-w-7xl w-full mx-auto relative">
+          {/* Subtle background glow effect */}
+          <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-brand/5 to-transparent -z-10 pointer-events-none rounded-t-3xl" />
           <Outlet />
         </main>
       </div>

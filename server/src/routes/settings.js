@@ -50,6 +50,7 @@ router.get(
     res.json({
       payeeVpa: value.payeeVpa || '',
       payeeName: value.payeeName || '',
+      upiNumber: value.upiNumber || '',
       defaultNote: value.defaultNote || '',
       qrImageUrl: value.qrImageUrl || '',
     });
@@ -62,9 +63,10 @@ router.put(
   requireAuth,
   requireRole('admin'),
   asyncHandler(async (req, res) => {
-    const { payeeVpa, payeeName, defaultNote, qrImageUrl } = req.body || {};
+    const { payeeVpa, payeeName, upiNumber, defaultNote, qrImageUrl } = req.body || {};
     const cleanVpa = payeeVpa ? String(payeeVpa).trim() : '';
     const cleanName = payeeName ? String(payeeName).trim() : '';
+    const cleanUpiNumber = upiNumber ? String(upiNumber).trim() : '';
     const cleanQrUrl = cleanOptionalUrl(qrImageUrl, 'QR image URL');
     if ((!cleanVpa || !cleanName) && !cleanQrUrl) {
       throw new HttpError(400, 'Enter UPI ID and payee name, or upload a QR image.');
@@ -79,6 +81,7 @@ router.put(
     const value = {
       payeeVpa: cleanVpa,
       payeeName: cleanName,
+      upiNumber: cleanUpiNumber,
       defaultNote: defaultNote ? String(defaultNote).trim() : '',
       qrImageUrl: cleanQrUrl,
     };
