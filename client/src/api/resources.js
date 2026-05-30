@@ -88,6 +88,11 @@ export const getRegistrations = (params) => api.get('/api/registrations', { para
 export const getRegistration = (id) => api.get(`/api/registrations/${id}`).then((r) => r.data);
 export const createRegistration = (body) => api.post('/api/registrations', body).then((r) => r.data);
 export const updateRegistration = (id, body) => api.patch(`/api/registrations/${id}`, body).then((r) => r.data);
+
+// ---- Public ----
+export const getPublicStats = () => api.get('/api/public/stats').then((r) => r.data);
+export const getPublicFeed = () => api.get('/api/public/feed').then((r) => r.data);
+export const getActiveScheme = () => api.get('/api/public/active-scheme').then((r) => r.data);
 export const submitRegistration = (id) => api.patch(`/api/registrations/${id}/submit`).then((r) => r.data);
 export const linkCouple = (body) => api.post('/api/registrations/link-couple', body).then((r) => r.data);
 

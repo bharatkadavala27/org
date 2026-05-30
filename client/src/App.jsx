@@ -4,6 +4,8 @@ import { useAuth } from './context/AuthContext';
 import { Loading } from './components/States';
 
 // Public
+import PublicLayout from './layouts/PublicLayout';
+import HomePage from './pages/public/HomePage';
 import DonatePage from './pages/DonatePage';
 import LoginPage from './pages/LoginPage';
 
@@ -51,12 +53,6 @@ function hexToRgb(hex) {
   return '185 28 28'; // default red
 }
 
-function HomeRedirect() {
-  const { user, ready } = useAuth();
-  if (!ready) return <Loading />;
-  if (!user) return <Navigate to="/donate" replace />;
-  return <Navigate to={user.role === 'admin' ? '/admin' : '/sub'} replace />;
-}
 
 function ThemeInjector() {
   const { data: branding } = useQuery({ queryKey: ['branding'], queryFn: getBranding });
@@ -76,9 +72,11 @@ export default function App() {
       <ThemeInjector />
       <Routes>
       {/* Public */}
-      <Route path="/" element={<HomeRedirect />} />
-      <Route path="/donate" element={<DonatePage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/donate" element={<DonatePage />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Route>
 
       {/* Admin */}
       <Route

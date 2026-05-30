@@ -25,6 +25,7 @@ import documentsRouter from './routes/documents.js';
 import expensesRouter from './routes/expenses.js';
 import budgetsRouter from './routes/budgets.js';
 import donorMergeRouter from './routes/donorMerge.js';
+import publicRouter from './routes/public.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -126,6 +127,7 @@ export function createApp() {
   app.use('/api/expenses', expensesRouter);
   app.use('/api/budgets', budgetsRouter);
   app.use('/api/donor-merge', donorMergeRouter);
+  app.use('/api/public', publicDonationLimiter, publicRouter);
 
   app.locals.publicDonationLimiter = publicDonationLimiter;
 
