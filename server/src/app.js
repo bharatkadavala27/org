@@ -33,7 +33,24 @@ export function createApp() {
   const app = express();
 
   // --- Security & parsing ---
-  app.use(helmet());
+  // CSP tuned for this app: allow Cloudinary images, Google Fonts, same-origin assets.
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+          fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
+          connectSrc: ["'self'", 'https://api.cloudinary.com'],
+          formAction: ["'self'"],
+          frameSrc: ["'self'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+    })
+  );
   app.use(express.json({ limit: '2mb' }));
   app.use(express.urlencoded({ extended: true }));
   app.use(mongoSanitize());
@@ -46,7 +63,6 @@ export function createApp() {
   app.use(
     cors({
       origin(origin, cb) {
-        // allow non-browser tools (no origin) and allowlisted origins
         if (!origin || allowlist.includes('*') || allowlist.includes(origin)) return cb(null, true);
         return cb(new Error(`CORS blocked: ${origin}`));
       },
@@ -75,7 +91,7 @@ export function createApp() {
     message: { message: 'Too many requests. Please try again later.' },
   });
 
-  // --- Routes ---
+  // --- API Routes ---
   app.use('/health', healthRouter);
   app.use('/api/auth', authLimiter, authRouter);
   app.use('/api/users', usersRouter);
@@ -94,15 +110,16 @@ export function createApp() {
   app.use('/api/budgets', budgetsRouter);
   app.use('/api/donor-merge', donorMergeRouter);
 
-  // Expose the public donation limiter for the public donate route (mounted inside donors).
   app.locals.publicDonationLimiter = publicDonationLimiter;
 
-  // --- 404 + errors ---
-  app.use('/api', notFound); // unhandled API routes return JSON 404
+  // Unhandled API routes return JSON 404 (before the SPA catch-all).
+  app.use('/api', notFound);
 
+  // --- Static client (production) ---
   if (process.env.NODE_ENV === 'production') {
     const clientDist = path.join(__dirname, '../../client/dist');
     app.use(express.static(clientDist));
+    // SPA fallback: anything not starting with /api or /health returns index.html
     app.get('*', (_req, res) => {
       res.sendFile(path.join(clientDist, 'index.html'));
     });

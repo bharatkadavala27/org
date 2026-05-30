@@ -1,18 +1,14 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL;
-if (!baseURL) {
-  // Fail loudly in dev so we never accidentally use relative /api (breaks the APK).
-  // eslint-disable-next-line no-console
-  console.error('VITE_API_URL is not set. Set it in client/.env');
-}
+// Same-origin deploy (backend serves the client): default to relative ''.
+// Set VITE_API_URL only when the API is on a different origin (e.g. APK, split hosting).
+const baseURL = import.meta.env.VITE_API_URL || '';
 
 export const api = axios.create({
   baseURL,
   timeout: 60000, // Render free tier cold start can be ~50s
 });
 
-// In-memory token; mirrored to a module variable set by AuthContext.
 let authToken = null;
 let onUnauthorized = null;
 
@@ -35,7 +31,6 @@ api.interceptors.response.use(
     if (status === 401 && onUnauthorized) {
       onUnauthorized();
     }
-    // Normalize a human-readable message for the UI.
     const message =
       err.response?.data?.message ||
       (err.code === 'ECONNABORTED'

@@ -54,7 +54,7 @@ export const commitImport = (body) => api.post('/api/import/commit', body).then(
 export const getAudit = (params) => api.get('/api/audit', { params }).then((r) => r.data);
 export const auditCsvUrl = (params) => {
   const qs = new URLSearchParams(params).toString();
-  return `${import.meta.env.VITE_API_URL}/api/audit/export.csv?${qs}`;
+  return `${import.meta.env.VITE_API_URL || ''}/api/audit/export.csv?${qs}`;
 };
 
 // ---- Expenses ----

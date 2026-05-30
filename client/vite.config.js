@@ -25,6 +25,7 @@ export default defineConfig({
     }),
   ],
   server: { port: 5173, host: true },
-  // relative base so the Capacitor APK can load assets from the file system
-  base: './',
+  // Absolute base for the web deploy (backend serves /assets correctly).
+  // For the Capacitor APK build, set base to './' via a separate build if needed.
+  base: '/',
 });
