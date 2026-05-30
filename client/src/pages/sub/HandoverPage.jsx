@@ -23,7 +23,7 @@ export default function HandoverPage() {
     queryFn: () => getHandovers(),
   });
 
-  const eligibleSlips = slipsQ.data || [];
+  const eligibleSlips = Array.isArray(slipsQ.data) ? slipsQ.data : (slipsQ.data?.slips || []);
   const selectedIds = Object.keys(selected).filter((k) => selected[k]);
   const selectedSlips = eligibleSlips.filter((s) => selectedIds.includes(String(s.id || s._id)));
   const expectedTotal = useMemo(() => sumPaise(selectedSlips.map((s) => s.amount)), [selectedSlips]);

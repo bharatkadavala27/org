@@ -22,7 +22,7 @@ export default function SubDashboard() {
   if (slipsQ.isLoading) return <Loading />;
   if (slipsQ.error) return <ErrorState error={slipsQ.error} onRetry={slipsQ.refetch} />;
 
-  const slips = slipsQ.data || [];
+  const slips = Array.isArray(slipsQ.data) ? slipsQ.data : (slipsQ.data?.slips || []);
   const todayStr = new Date().toDateString();
   const todaySlips = slips.filter((s) => new Date(s.issuedAt || s.createdAt).toDateString() === todayStr);
   const todayTotal = sumPaise(todaySlips.map((s) => s.amount));

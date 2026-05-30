@@ -71,7 +71,7 @@ export default function MySlipsPage() {
   if (isLoading) return <Loading />;
   if (error) return <ErrorState error={error} onRetry={refetch} />;
 
-  const list = slips || [];
+  const list = Array.isArray(slips) ? slips : (slips?.slips || []);
 
   return (
     <div>

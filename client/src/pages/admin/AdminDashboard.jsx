@@ -26,9 +26,9 @@ export default function AdminDashboard() {
   if (slipsQ.isLoading || pendingQ.isLoading || handoversQ.isLoading) return <Loading />;
   if (slipsQ.error) return <ErrorState error={slipsQ.error} onRetry={slipsQ.refetch} />;
 
-  const slips = slipsQ.data || [];
+  const slips = Array.isArray(slipsQ.data) ? slipsQ.data : (slipsQ.data?.slips || []);
   const confirmedTotal = sumPaise(slips.filter((s) => s.paymentConfirmed).map((s) => s.amount));
-  const pending = pendingQ.data || [];
+  const pending = Array.isArray(pendingQ.data) ? pendingQ.data : (pendingQ.data?.slips || []);
   const handovers = handoversQ.data || [];
 
   return (
