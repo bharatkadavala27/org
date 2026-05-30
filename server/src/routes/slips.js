@@ -121,13 +121,28 @@ router.get(
       filter.paymentMode = 'cash';
     }
 
-    const slips = await Slip.find(filter)
-      .sort({ issuedAt: -1 })
-      .limit(500)
-      .populate('donorId', 'name village mobile')
-      .populate('schemeId', 'name')
-      .lean();
-    res.json(slips.map(serialize));
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const [slips, total] = await Promise.all([
+      Slip.find(filter)
+        .sort({ issuedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('donorId', 'name village mobile')
+        .populate('schemeId', 'name')
+        .lean(),
+      Slip.countDocuments(filter),
+    ]);
+
+    res.json({
+      slips: slips.map(serialize),
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      limit,
+    });
   })
 );
 

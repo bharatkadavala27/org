@@ -35,6 +35,7 @@ import HandoverPage from './pages/sub/HandoverPage';
 
 import { useQuery } from '@tanstack/react-query';
 import { getBranding } from './api/resources';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Helper to convert hex to rgb for Tailwind opacity
 function hexToRgb(hex) {
@@ -71,7 +72,7 @@ function ThemeInjector() {
 
 export default function App() {
   return (
-    <>
+    <ErrorBoundary>
       <ThemeInjector />
       <Routes>
       {/* Public */}
@@ -121,6 +122,6 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </>
+    </ErrorBoundary>
   );
 }
