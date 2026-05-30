@@ -183,6 +183,33 @@ router.patch(
   })
 );
 
+// PATCH /api/handovers/:id/resolve — admin resolves a disputed handover
+router.patch(
+  '/:id/resolve',
+  requireRole('admin'),
+  asyncHandler(async (req, res) => {
+    const { note } = req.body || {};
+    if (!note || !String(note).trim()) throw new HttpError(400, 'A resolution note is required.');
+    const h = await Handover.findById(req.params.id);
+    if (!h) throw new HttpError(404, 'Handover not found.');
+    if (h.status !== 'disputed') throw new HttpError(400, 'Only disputed handovers can be resolved.');
+    const before = { status: h.status };
+    h.status = 'resolved';
+    h.note = h.note ? `${h.note} | Resolved: ${String(note).trim()}` : `Resolved: ${String(note).trim()}`;
+    await h.save();
+    
+    await audit({
+      req,
+      action: 'handover.resolve',
+      entityType: 'Handover',
+      entityId: h._id,
+      before,
+      after: { status: 'resolved', note: h.note },
+    });
+    res.json(serialize(h));
+  })
+);
+
 function serialize(h) {
   return {
     id: String(h._id),

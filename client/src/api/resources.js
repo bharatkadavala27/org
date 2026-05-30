@@ -48,6 +48,7 @@ export const getHandover = (id) => api.get(`/api/handovers/${id}`).then((r) => r
 export const createHandover = (body) => api.post('/api/handovers', body).then((r) => r.data);
 export const confirmHandover = (id) => api.patch(`/api/handovers/${id}/confirm`).then((r) => r.data);
 export const disputeHandover = (id, note) => api.patch(`/api/handovers/${id}/dispute`, { note }).then((r) => r.data);
+export const resolveHandover = (id, note) => api.patch(`/api/handovers/${id}/resolve`, { note }).then((r) => r.data);
 
 // ---- Import ----
 export const validateImport = (body) => api.post('/api/import/validate', body).then((r) => r.data);
