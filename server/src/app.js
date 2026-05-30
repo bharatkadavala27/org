@@ -31,6 +31,8 @@ const __dirname = path.dirname(__filename);
 
 export function createApp() {
   const app = express();
+  // Render runs behind a proxy; needed for correct rate-limit IPs and protocol.
+  app.set('trust proxy', 1);
 
   // --- Security & parsing ---
   // CSP tuned for this app: allow Cloudinary images, Google Fonts, same-origin assets.
@@ -40,7 +42,7 @@ export function createApp() {
         directives: {
           defaultSrc: ["'self'"],
           imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
-          scriptSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
           fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
           connectSrc: ["'self'", 'https://api.cloudinary.com'],
@@ -55,15 +57,30 @@ export function createApp() {
   app.use(express.urlencoded({ extended: true }));
   app.use(mongoSanitize());
 
-  // --- CORS allowlist (incl. Capacitor origins) ---
+  // --- CORS ---
+  // Allowlist from env, PLUS any *.onrender.com origin (deploy-proof), PLUS no-origin tools.
   const allowlist = (process.env.CORS_ORIGINS || '')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
+  function isAllowedOrigin(origin) {
+    if (!origin) return true; // curl / same-origin / mobile webview
+    if (allowlist.includes('*') || allowlist.includes(origin)) return true;
+    try {
+      const host = new URL(origin).hostname;
+      if (host === 'localhost' || host === '127.0.0.1') return true;
+      if (host.endsWith('.onrender.com')) return true;
+      if (host.endsWith('.vercel.app')) return true;
+      if (host.endsWith('.netlify.app')) return true;
+    } catch {
+      return false;
+    }
+    return false;
+  }
   app.use(
     cors({
       origin(origin, cb) {
-        if (!origin || allowlist.includes('*') || allowlist.includes(origin)) return cb(null, true);
+        if (isAllowedOrigin(origin)) return cb(null, true);
         return cb(new Error(`CORS blocked: ${origin}`));
       },
       credentials: true,
@@ -78,14 +95,14 @@ export function createApp() {
   const isDev = process.env.NODE_ENV !== 'production';
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: isDev ? 3000 : 30,
+    max: isDev ? 3000 : 60,
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: 'Too many attempts. Please try again later.' },
   });
   const publicDonationLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: isDev ? 6000 : 60,
+    max: isDev ? 6000 : 120,
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: 'Too many requests. Please try again later.' },
@@ -119,7 +136,6 @@ export function createApp() {
   if (process.env.NODE_ENV === 'production') {
     const clientDist = path.join(__dirname, '../../client/dist');
     app.use(express.static(clientDist));
-    // SPA fallback: anything not starting with /api or /health returns index.html
     app.get('*', (_req, res) => {
       res.sendFile(path.join(clientDist, 'index.html'));
     });
