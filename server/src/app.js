@@ -47,7 +47,7 @@ export function createApp() {
     cors({
       origin(origin, cb) {
         // allow non-browser tools (no origin) and allowlisted origins
-        if (!origin || allowlist.includes(origin)) return cb(null, true);
+        if (!origin || allowlist.includes('*') || allowlist.includes(origin)) return cb(null, true);
         return cb(new Error(`CORS blocked: ${origin}`));
       },
       credentials: true,
