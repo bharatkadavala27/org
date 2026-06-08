@@ -69,6 +69,8 @@ export default function LoginPage() {
                 type="button"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-brand font-medium"
                 onClick={() => setShowPwd(!showPwd)}
+                aria-label={showPwd ? 'Hide password' : 'Show password'}
+                aria-pressed={showPwd}
               >
                 {showPwd ? t.hide : t.show}
               </button>
