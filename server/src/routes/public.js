@@ -6,10 +6,20 @@ import Scheme from '../models/Scheme.js';
 
 const router = express.Router();
 
+// Simple in-memory cache for public stats (5 minutes)
+let statsCache = null;
+let statsCacheTime = 0;
+const STATS_CACHE_TTL = 5 * 60 * 1000;
+
 // GET /api/public/stats
 // Returns aggregated statistics for the homepage impact counter.
 router.get('/stats', async (req, res, next) => {
   try {
+    const now = Date.now();
+    if (statsCache && (now - statsCacheTime < STATS_CACHE_TTL)) {
+      return res.json(statsCache);
+    }
+
     // 1. Total donation amount (active, confirmed slips)
     const amountAggr = await Slip.aggregate([
       { $match: { status: 'active', paymentConfirmed: true } },
@@ -23,11 +33,14 @@ router.get('/stats', async (req, res, next) => {
     // 3. Couples Married (Verified registrations)
     const couplesCount = await Registration.countDocuments({ status: 'verified' });
 
-    res.json({
+    statsCache = {
       totalAmount,
       villagesReached: villagesCount,
       couplesMarried: couplesCount,
-    });
+    };
+    statsCacheTime = now;
+
+    res.json(statsCache);
   } catch (err) {
     next(err);
   }

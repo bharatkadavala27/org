@@ -1,0 +1,3 @@
+## 2024-06-08 - Caching expensive public aggregation endpoints
+**Learning:** The public home page fetches `stats`, `feed`, and `active-scheme` on every page load. The `/stats` endpoint runs a `$group` aggregation over the entire `Slip` collection, a `distinct` query on the `Donor` collection, and a `countDocuments` on `Registration`. On a public landing page with potentially high traffic, this is a significant bottleneck that scales poorly with collection size and traffic volume.
+**Action:** Always implement short-lived in-memory caching (TTL) for high-frequency, read-heavy public endpoints that do not require perfect real-time accuracy to drastically reduce database load.
