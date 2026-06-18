@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Scheme from '../models/Scheme.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { requireAuth } from '../middleware/auth.js';
+import { requireRole } from '../middleware/rbac.js';
 import { asyncHandler, HttpError } from '../middleware/errorHandler.js';
 import { audit } from '../middleware/audit.js';
 
